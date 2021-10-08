@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.min.js"></script>
+    <script src="assets/js/morris.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
+
+    <script src="assets/js/example.js"></script>
+    <script src="assets/js/jquery-ui.js"></script>
+    <link rel="stylesheet" href="assets/css/jquery-ui.css" />
+
+    <link
+      rel="stylesheet"
+      href="http://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="http://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css"
+    />
+  </head>
+  <body>
+    <h1>Bar charts</h1>
+    <div
+      style="
+        padding: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      "
+    >
+      <p>
+        Start Date:
+        <input
+          type="text"
+          id="start"
+          class="datepicker"
+          style="padding: 8px; border: 1px solid #9581ee; border-radius: 5px"
+        />
+      </p>
+      <p style="padding-left: 50px">
+        End Date:
+        <input
+          type="text"
+          id="end"
+          class="datepicker"
+          style="padding: 8px; border: 1px solid #9581ee; border-radius: 5px"
+        />
+      </p>
+    </div>
+    <div style="padding-top: 200px"></div>
+    <div id="graph"></div>
+  </body>
+  <script>
+    $(document).ready(function () {
+      const array = []
+      let startY, startM, endY, endM, startDate, endDate
+      $("#end").on("change", function () {
+        $("#graph").empty()
+        if ($("#start").val() === "") {
+          alert("Please insert the data")
+        } else {
+          startY = $("#start").val().split("-")[2]
+          startM = $("#start").val().split("-")[0]
+          endY = $("#end").val().split("-")[2]
+          endM = $("#end").val().split("-")[0]
+          if (startY > endY) {
+            alert("Start date should be less than End date")
+          } else if (startY === endY && startM >= endM) {
+            alert("Start date should be less than End date")
+          } else {
+            startDate = startY + "-" + startM
+            endDate = endY + "-" + endM
+            $.ajax({
+              dataType: "json",
+              type: "GET",
+              url: "./data.php?start=" + startDate + "&end=" + endDate,
+            }).done(function (data) {
+              chartData = data
+              // Use Morris.Bar
+              Morris.Bar({
+                element: "graph",
+                data: chartData,
+                xkey: "x",
+                ykeys: ["y"],
+                labels: ["Y"],
+              }).on("click", function (i, row) {
+                console.log(i, row)
+              })
+            })
+          }
+        }
+      })
+
+      //date picker
+      $(function () {
+        $(".datepicker").datepicker({
+          dateFormat: "mm-dd-yy",
+          flat: true,
+        })
+      })
+    })
+  </script>
+</html>
